@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://paramjeets.github.io/ardaasprathnaprayer/sitemap.xml
