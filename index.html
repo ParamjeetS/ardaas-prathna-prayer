@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Ardaas Prathna Prayer</title>
+
+  <!-- Google Search Console Verification Tag -->
+  <meta name="google-site-verification" content="Aw17B9rUA7pv8EkKgkyWJJItkFFr8xAxau8V18ZZWjc" />
+
+  <!-- Google Analytics 4 (gtag.js) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-RRCX1BN0DN"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+
+    gtag('config', 'G-RRCX1BN0DN');
+  </script>
+
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-slate-50 min-h-screen flex items-center justify-center p-4">
+
+  <div class="max-w-md w-full bg-white rounded-xl shadow-md p-6 space-y-6">
+    <!-- Header -->
+    <div>
+      <h1 class="text-2xl font-bold text-center text-slate-800">Ardaas Prathna Prayer</h1>
+      <p class="text-xs text-center text-slate-500 mt-1">Select a category and offer your silent prayer.</p>
+    </div>
+
+    <!-- Messages -->
+    <div id="successMessage" class="hidden p-4 rounded-lg bg-emerald-50 border border-emerald-200 text-emerald-800 text-sm font-medium text-center"></div>
+    <div id="errorMessage" class="hidden p-3 rounded-lg bg-rose-50 border border-rose-200 text-rose-700 text-xs text-center"></div>
+
+    <!-- Form -->
+    <form id="prayerForm" class="space-y-4" onsubmit="handleFormSubmit(event)">
+      <div>
+        <label class="block text-xs font-semibold text-slate-600 mb-1">Prayer Type</label>
+        <select id="prayerType" required class="w-full border border-slate-300 rounded-lg p-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500">
+          <option value="" disabled selected>-- Select Type --</option>
+          <option value="Health">Health & Healing</option>
+          <option value="Wealth">Wealth & Prosperity</option>
+          <option value="Peace">Peace & Tranquility</option>
+          <option value="Happiness">Happiness & Joy</option>
+          <option value="Money">Money & Financial Freedom</option>
+          <option value="Family">Family Harmony & Unity</option>
+          <option value="Career">Career & Job Success</option>
+          <option value="Education">Education & Wisdom</option>
+          <option value="Love">Love & Relationships</option>
+          <option value="Protection">Protection & Safety</option>
+          <option value="Forgiveness">Forgiveness & Mercy</option>
+          <option value="Gratitude">Gratitude & Thanksgiving</option>
+          <option value="Guidance">Guidance & Clarity</option>
+          <option value="Strength">Strength & Courage</option>
+          <option value="Hope">Hope & Faith</option>
+        </select>
+      </div>
+
+      <div>
+        <label class="block text-xs font-semibold text-slate-600 mb-1">Your Prayer</label>
+        <textarea id="prayerText" rows="3" required placeholder="Type your prayer here..." class="w-full border border-slate-300 rounded-lg p-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"></textarea>
+      </div>
+
+      <div>
+        <label class="block text-xs font-semibold text-slate-600 mb-1">Security Check</label>
+        <div class="flex items-center space-x-3 mb-2">
+          <span id="captchaCode" class="bg-slate-200 text-slate-800 font-mono font-bold tracking-widest px-4 py-2 rounded-lg text-lg select-none line-through"></span>
+          <button type="button" onclick="generateCaptcha()" class="text-xs text-indigo-600 hover:underline">Refresh Code</button>
+        </div>
+        <input type="text" id="captchaInput" maxlength="4" placeholder="Enter 4-character captcha" required class="w-full border border-slate-300 rounded-lg p-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 uppercase" />
+      </div>
+
+      <button type="submit" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-2.5 rounded-lg text-sm transition duration-150">
+        Submit Prayer
+      </button>
+    </form>
+
+    <!-- Recent Prayers List Section -->
+    <div class="border-t border-slate-200 pt-4 space-y-3">
+      <div class="flex justify-between items-center">
+        <h2 class="text-sm font-bold text-slate-700">Your Saved Prayers</h2>
+        <button onclick="clearPrayerHistory()" class="text-xs text-rose-500 hover:underline">Clear History</button>
+      </div>
+      
+      <!-- Search Box -->
+      <input 
+        type="text" 
+        id="searchInput" 
+        oninput="renderPrayerList()" 
+        placeholder="Search by category or keyword..." 
+        class="w-full border border-slate-300 rounded-lg p-2 text-xs focus:outline-none focus:ring-2 focus:ring-indigo-500"
+      />
+
+      <div id="prayerList" class="space-y-2 max-h-60 overflow-y-auto pr-1">
+        <!-- Filtered prayers load here -->
+      </div>
+    </div>
+  </div>
+
+  <script>
+    let currentCaptcha = "";
+    const profanityList = ["badword1", "badword2", "hate", "vulgar"]; 
+
+    const responseMessages = {
+      Health: "May divine health, healing, and physical strength flow into your life.",
+      Wealth: "May abundance, stability, and prosperity bless your home and efforts.",
+      Peace: "May serene peace fill your heart and quiet all anxiety within your soul.",
+      Happiness: "May joy, light, and positive energy brighten every step of your journey.",
+      Money: "May financial growth, wise provision, and relief enter your life swiftly.",
+      Family: "May love, patience, and unity bring harmony to your home and family.",
+      Career: "May doors of opportunity, success, and fulfillment open in your career.",
+      Education: "May focus, wisdom, and clarity guide your mind toward learning and growth.",
+      Love: "May genuine love, compassion, and meaningful bonds surround your heart.",
+      Protection: "May safe keeping and divine protection guard you and your loved ones from all harm.",
+      Forgiveness: "May peace of mind, release, and merciful grace heal your soul.",
+      Gratitude: "May your thankful heart continue to attract endless blessings and kindness.",
+      Guidance: "May wisdom illuminate your path and bring clarity to your important decisions.",
+      Strength: "May unwavering courage and inner fortitude lift you above all challenges.",
+      Hope: "May faith and hope restore your spirit and bring light to your tomorrow."
+    };
+
+    function generateCaptcha() {
+      const chars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789"; 
+      currentCaptcha = "";
+      for (let i = 0; i < 4; i++) {
+        currentCaptcha += chars.charAt(Math.floor(Math.random() * chars.length));
+      }
+      document.getElementById("captchaCode").innerText = currentCaptcha;
+    }
+
+    function containsProfanity(text) {
+      const lowerText = text.toLowerCase();
+      return profanityList.some(word => lowerText.includes(word.toLowerCase()));
+    }
+
+    // Save prayer to Local Storage (Unlimited)
+    function savePrayerToLocal(type, text) {
+      const existingPrayers = JSON.parse(localStorage.getItem("userPrayers") || "[]");
+      const newPrayer = {
+        type: type,
+        text: text,
+        date: new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })
+      };
+      existingPrayers.unshift(newPrayer);
+      localStorage.setItem("userPrayers", JSON.stringify(existingPrayers));
+      renderPrayerList();
+    }
+
+    // Display list with active search filter
+    function renderPrayerList() {
+      const prayerListContainer = document.getElementById("prayerList");
+      const searchQuery = (document.getElementById("searchInput")?.value || "").toLowerCase().trim();
+      const existingPrayers = JSON.parse(localStorage.getItem("userPrayers") || "[]");
+
+      if (existingPrayers.length === 0) {
+        prayerListContainer.innerHTML = `<p class="text-xs text-slate-400 text-center py-2">No saved prayers yet.</p>`;
+        return;
+      }
+
+      // Filter prayers matching type OR text
+      const filteredPrayers = existingPrayers.filter(item => {
+        const typeMatch = item.type.toLowerCase().includes(searchQuery);
+        const textMatch = item.text.toLowerCase().includes(searchQuery);
+        return typeMatch || textMatch;
+      });
+
+      if (filteredPrayers.length === 0) {
+        prayerListContainer.innerHTML = `<p class="text-xs text-slate-400 text-center py-2">No matching prayers found.</p>`;
+        return;
+      }
+
+      prayerListContainer.innerHTML = filteredPrayers.map(item => {
+        // Find exact index in storage array for safe deletion
+        const originalIndex = existingPrayers.findIndex(
+          p => p.type === item.type && p.text === item.text && p.date === item.date
+        );
+
+        return `
+          <div class="p-3 bg-slate-50 border border-slate-200 rounded-lg space-y-1 relative group">
+            <div class="flex justify-between items-center text-xs pr-6">
+              <span class="font-semibold text-indigo-600">${item.type}</span>
+              <span class="text-slate-400 text-[10px]">${item.date}</span>
+            </div>
+            <p class="text-xs text-slate-700">${escapeHtml(item.text)}</p>
+            
+            <button 
+              onclick="deleteSinglePrayer(${originalIndex})" 
+              title="Delete Prayer"
+              class="absolute top-2 right-2 text-slate-400 hover:text-rose-500 font-bold text-xs p-1"
+            >
+              ✕
+            </button>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function deleteSinglePrayer(index) {
+      const existingPrayers = JSON.parse(localStorage.getItem("userPrayers") || "[]");
+      if (index > -1 && index < existingPrayers.length) {
+        existingPrayers.splice(index, 1);
+        localStorage.setItem("userPrayers", JSON.stringify(existingPrayers));
+      }
+      renderPrayerList();
+    }
+
+    function clearPrayerHistory() {
+      if (confirm("Are you sure you want to clear your local prayer history?")) {
+        localStorage.removeItem("userPrayers");
+        renderPrayerList();
+      }
+    }
+
+    function escapeHtml(str) {
+      return str.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;");
+    }
+
+    function handleFormSubmit(event) {
+      event.preventDefault();
+      
+      const type = document.getElementById("prayerType").value;
+      const text = document.getElementById("prayerText").value;
+      const userCaptcha = document.getElementById("captchaInput").value.trim().toUpperCase();
+
+      const successBox = document.getElementById("successMessage");
+      const errorBox = document.getElementById("errorMessage");
+
+      successBox.classList.add("hidden");
+      errorBox.classList.add("hidden");
+
+      if (userCaptcha !== currentCaptcha) {
+        errorBox.innerText = "Incorrect captcha code. Please try again.";
+        errorBox.classList.remove("hidden");
+        generateCaptcha();
+        document.getElementById("captchaInput").value = "";
+        return;
+      }
+
+      if (containsProfanity(text)) {
+        errorBox.innerText = "Your text contains unacceptable language. Please keep the prayer respectful.";
+        errorBox.classList.remove("hidden");
+        generateCaptcha();
+        return;
+      }
+
+      savePrayerToLocal(type, text);
+
+      successBox.innerText = responseMessages[type] || "May your prayer be heard and answered with blessings.";
+      successBox.classList.remove("hidden");
+
+      document.getElementById("prayerForm").reset();
+      generateCaptcha();
+    }
+
+    window.onload = function() {
+      generateCaptcha();
+      renderPrayerList();
+    };
+  </script>
+</body>
+</html>
